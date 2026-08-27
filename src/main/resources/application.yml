@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: spring-tenant-isolation-lab
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        # Each test profile maps to its own schema: "naive" (no RLS) or "secured" (RLS enabled).
+        default_schema: ${app.schema:naive}
+        # Second-level entity cache (JCache/Ehcache). The cache key encodes the tenant id, so
+        # a load for one tenant can never return another tenant's cached entity (tested).
+        cache.use_second_level_cache: true
+        cache.region.factory_class: jcache
+        generate_statistics: true
+
+  flyway:
+    enabled: true
+
+  datasource:
+    hikari:
+      # Pool of 1 makes tenant-reuse across pooled connections deterministic in the tests.
+      maximum-pool-size: ${pool.size:1}
+
+app:
+  schema: ${app.schema:naive}
+  security:
+    jwt:
+      issuer: ${JWT_ISSUER:https://identity.example.test}
+      audience: ${JWT_AUDIENCE:document-api}
+      public-key-location: ${JWT_PUBLIC_KEY_LOCATION:classpath:keys/jwt-issuer.pem}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    root: INFO
