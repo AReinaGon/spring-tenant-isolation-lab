@@ -1,0 +1,16 @@
+app:
+  schema: naive
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${db.host}:${db.port}/${db.name}?currentSchema=${app.schema}
+    username: ${db.app.user}
+    password: ${db.app.password}
+  flyway:
+    url: jdbc:postgresql://${db.host}:${db.port}/${db.name}
+    user: ${db.migrator.user}
+    password: ${db.migrator.password}
+    schemas: ${app.schema}
+    locations: classpath:db/migration/common
+    placeholders:
+      appSchema: ${app.schema}
